@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CATEGORIES, SEVERITIES } from '@/lib/constants';
+import { CATEGORIES, SEVERITIES, SEVERITY_COLORS } from '@/lib/constants';
 import { IncidentCategory, IncidentSeverity } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +45,15 @@ export default function IncidentForm() {
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    summary: string;
+    suggested_category: string;
+    suggested_severity: string;
+    reasoning: string;
+  } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
     if (!title.trim()) newErrors.title = 'Incident title is required.';
@@ -55,6 +64,55 @@ export default function IncidentForm() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const analyzeWithAI = async () => {
+    setAiError('');
+    setAiSuggestion(null);
+
+    if (!title.trim() || !description.trim()) {
+      setAiError('Title and description are required for AI analysis.');
+      return;
+    }
+
+    if (description.trim().length < 10) {
+      setAiError('Description must be at least 10 characters long.');
+      return;
+    }
+
+    setAiLoading(true);
+
+    try {
+      const response = await fetch('/api/ai-analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'AI Analysis failed.');
+      }
+
+      setAiSuggestion(data);
+    } catch (err: any) {
+      setAiError(err.message || 'Failed to complete AI analysis.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const acceptAISuggestion = () => {
+    if (!aiSuggestion) return;
+    setCategory(aiSuggestion.suggested_category as IncidentCategory);
+    setSeverity(aiSuggestion.suggested_severity as IncidentSeverity);
+    setAiSuggestion(null);
   };
 
   const handleSubmit = async () => {
@@ -78,6 +136,7 @@ export default function IncidentForm() {
           severity,
           description: description.trim(),
           reported_by: reportedBy.trim() || undefined,
+          ai_summary: aiSuggestion?.summary || null,
         }),
       });
 
@@ -96,6 +155,7 @@ export default function IncidentForm() {
       setDescription('');
       setReportedBy('');
       setErrors({});
+      setAiSuggestion(null);
       window.scrollTo(0, 0);
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
@@ -238,6 +298,93 @@ export default function IncidentForm() {
               className={errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200'}
             />
             {errors.description && <p className="text-xs font-medium text-red-600">{errors.description}</p>}
+          </div>
+
+          {/* AI Analysis Block */}
+          <div className="space-y-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!title.trim() || !description.trim() || aiLoading}
+              onClick={analyzeWithAI}
+              className="flex items-center gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-colors h-10 font-medium"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <span>✨</span>
+                  Analyze with AI
+                </>
+              )}
+            </Button>
+
+            {aiError && (
+              <p className="text-xs font-medium text-red-600">{aiError}</p>
+            )}
+
+            {aiSuggestion && (
+              <Card className="border-indigo-200 bg-indigo-50/40 shadow-xs overflow-hidden">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-indigo-950">
+                    <span>✨</span>
+                    <span>AI Analysis</span>
+                  </div>
+                  
+                  <p className="text-sm text-slate-700 leading-relaxed font-normal">
+                    {aiSuggestion.summary}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
+                    <div>
+                      <span className="font-semibold text-slate-700 block mb-0.5">Suggested Category:</span>
+                      <span className="text-sm font-medium text-slate-900">{aiSuggestion.suggested_category}</span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700 block mb-0.5">Suggested Severity:</span>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
+                        SEVERITY_COLORS[aiSuggestion.suggested_severity as IncidentSeverity] || ''
+                      }`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${
+                          SEVERITY_DOT_COLORS[aiSuggestion.suggested_severity as IncidentSeverity] || ''
+                        }`} />
+                        {aiSuggestion.suggested_severity}
+                      </span>
+                    </div>
+                  </div>
+
+                  {aiSuggestion.reasoning && (
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-700 block mb-0.5">Reasoning:</span>
+                      <span className="text-slate-600 italic leading-relaxed">{aiSuggestion.reasoning}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={acceptAISuggestion}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 font-medium px-3"
+                    >
+                      Apply Suggestions
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAiSuggestion(null)}
+                      className="text-slate-500 hover:text-slate-800 text-xs h-8 font-medium px-3 hover:bg-slate-100"
+                    >
+                      Dismiss
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 

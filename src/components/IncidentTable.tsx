@@ -123,8 +123,16 @@ export default function IncidentTable({ incidents, onStatusChange, loading }: In
                   </TableCell>
                   <TableCell className="max-w-[280px]">
                     <div className="flex flex-col space-y-1">
-                      <span className="font-semibold text-slate-900 leading-snug break-words">
+                      <span className="font-semibold text-slate-900 leading-snug break-words flex items-center gap-1.5">
                         {incident.title}
+                        {incident.ai_summary && (
+                          <span 
+                            title={incident.ai_summary} 
+                            className="cursor-help text-indigo-500 hover:text-indigo-600 transition-colors inline-block select-none text-xs"
+                          >
+                            ✨
+                          </span>
+                        )}
                       </span>
                       <span className="text-xs text-slate-500 leading-normal break-words">
                         {incident.store_location}
