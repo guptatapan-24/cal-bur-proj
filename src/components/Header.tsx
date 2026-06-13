@@ -22,6 +22,11 @@ export default function Header() {
       }
     }
     fetchStats();
+
+    window.addEventListener('incidentStatusChanged', fetchStats);
+    return () => {
+      window.removeEventListener('incidentStatusChanged', fetchStats);
+    };
   }, [pathname]);
 
   const isActive = (path: string) => pathname === path;

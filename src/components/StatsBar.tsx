@@ -31,6 +31,11 @@ export default function StatsBar() {
       }
     }
     fetchStats();
+
+    window.addEventListener('incidentStatusChanged', fetchStats);
+    return () => {
+      window.removeEventListener('incidentStatusChanged', fetchStats);
+    };
   }, []);
 
   const cardConfig = [

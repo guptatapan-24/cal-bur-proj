@@ -79,6 +79,9 @@ export default function DashboardPage() {
 
       toast.success(`Status updated to ${newStatus}`);
       
+      // Dispatch custom event to notify Header and StatsBar to update
+      window.dispatchEvent(new Event('incidentStatusChanged'));
+      
       // Refetch incidents to display updated list
       fetchIncidents(filters);
     } catch (err) {
