@@ -93,7 +93,7 @@ export default function IncidentTable({ incidents, onStatusChange, loading }: In
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-      <div className="overflow-x-auto w-full">
+      <div className="overflow-x-auto w-full min-h-[240px]">
         <Table className="min-w-[800px]">
           <TableHeader className="bg-slate-50">
             <TableRow>
@@ -137,7 +137,7 @@ export default function IncidentTable({ incidents, onStatusChange, loading }: In
                             <span className="cursor-help text-indigo-500 hover:text-indigo-600 transition-colors text-xs">
                               ✨
                             </span>
-                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 scale-0 transition-all rounded-md bg-slate-900 p-2.5 text-xs text-white group-hover:scale-100 whitespace-normal break-words shadow-md font-normal leading-relaxed z-50 pointer-events-none opacity-0 group-hover:opacity-100">
+                            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 scale-0 transition-all rounded-md bg-slate-900 p-2.5 text-xs text-white group-hover:scale-100 whitespace-normal break-words shadow-md font-normal leading-relaxed z-50 pointer-events-none opacity-0 group-hover:opacity-100">
                               <span className="font-semibold text-indigo-300 block mb-0.5">✨ AI Operational Summary</span>
                               {incident.ai_summary}
                             </span>
