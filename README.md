@@ -69,7 +69,7 @@ IncidentIQ is a professional, responsive Next.js 16 web application designed to 
 ### Steps
 1. **Clone the Repo & Install Dependencies**:
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/guptatapan-24/incident-iq>
    cd restaurant-incident-tool
    npm install
    ```
@@ -86,7 +86,7 @@ IncidentIQ is a professional, responsive Next.js 16 web application designed to 
    SESSION_SECRET=optional_random_hash_for_cookie_signing
    ```
 3. **Initialize the Supabase Database & Storage**:
-   Paste the content of [schema.sql](file:///f:/Inte/restaurant-incident-tool/docs/schema.sql) in your Supabase SQL Editor and run it. This script:
+   Paste the content of [schema.sql](docs/schema.sql) in your Supabase SQL Editor and run it. This script:
    - Drops/creates the `incidents`, `users`, and `notifications` tables.
    - Seeds default manager and staff login credentials.
    - Configures the public `incident-attachments` bucket and sets RLS read/write storage policies.
