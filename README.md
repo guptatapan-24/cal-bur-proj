@@ -5,7 +5,7 @@ IncidentIQ is a professional, responsive Next.js 16 web application designed to 
 ---
 
 ## 🔗 Deployed Live Link
-[Deployed URL — https://cal-bur-proj.vercel.app/]
+[Deployed URL — https://incident-iq-proj.vercel.app/]
 
 ---
 
